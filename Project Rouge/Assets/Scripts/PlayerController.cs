@@ -11,15 +11,22 @@ public class PlayerController : MonoBehaviour
     [Header("Gun Hand Reference")]
     [SerializeField] private Transform gunArm;
 
+    [Header("Bullet Prefab")]
+    [SerializeField] private GameObject bullet;
+    [SerializeField] private Transform firePoint;
+    [SerializeField] private float timeBetweenShots;
+    private float shotCounter;
+
     private Rigidbody2D rb;
     private Camera cam;
-
+    private Animator animator;
 
     // Start is called before the first frame update
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         cam = Camera.main;
+        animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -34,6 +41,16 @@ public class PlayerController : MonoBehaviour
         //   //transform.position += moveDir * moveSpeed * Time.deltaTime;
 
         rb.velocity = moveDir * moveSpeed;
+
+        // Checks if Charater is Moving
+        if (moveDir != Vector3.zero)
+        {
+            animator.SetBool("IsMoving", true);
+        }
+        else
+        {
+            animator.SetBool("IsMoving", false);
+        }
 
         // Get the Mouse and Player Positions 
         Vector3 mousePosition = Input.mousePosition;
@@ -57,5 +74,23 @@ public class PlayerController : MonoBehaviour
         float angle = Mathf.Atan2(offset.y, offset.x) * Mathf.Rad2Deg;
 
         gunArm.rotation = Quaternion.Euler(0f, 0f, angle);
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Instantiate(bullet, firePoint.transform.position, firePoint.rotation);
+            shotCounter = timeBetweenShots;
+        }
+
+        if (Input.GetMouseButton(0))
+        {
+            shotCounter -= Time.deltaTime;
+
+            if (shotCounter <= 0)
+            {
+                Instantiate(bullet, firePoint.transform.position, firePoint.rotation);
+
+                shotCounter = timeBetweenShots;
+            }
+        }
     }
 }
